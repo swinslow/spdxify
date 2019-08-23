@@ -15,6 +15,10 @@ func main() {
 
 	// parse command line
 	flag.Parse()
+	args := flag.Args()
+	if len(args) != 1 {
+		log.Fatalf("Usage: spdxify [-c] REPOPATH")
+	}
 
 	// load configuration file
 	cfg, err := spdxify.LoadConfig(*cfgPtr)
@@ -22,5 +26,11 @@ func main() {
 		log.Fatalf("error loading config file: %v", err)
 	}
 
-	log.Printf("config: %#v", cfg)
+	// get slice of files to test
+	sel, err := spdxify.SelectFiles(cfg, args[0])
+	if err != nil {
+		log.Fatalf("error preparing files for analysis: %v", err)
+	}
+
+	log.Printf("selected files: %v", sel)
 }
