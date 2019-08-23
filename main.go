@@ -20,6 +20,8 @@ func main() {
 		log.Fatalf("Usage: spdxify [-c] REPOPATH")
 	}
 
+	repoPath := args[0]
+
 	// load configuration file
 	cfg, err := spdxify.LoadConfig(*cfgPtr)
 	if err != nil {
@@ -27,10 +29,17 @@ func main() {
 	}
 
 	// get slice of files to test
-	sel, err := spdxify.SelectFiles(cfg, args[0])
+	sel, err := spdxify.SelectFiles(cfg, repoPath)
 	if err != nil {
 		log.Fatalf("error preparing files for analysis: %v", err)
 	}
 
+	// search for files with existing IDs
+	fis, err := spdxify.SearchSPDXIDs(repoPath, cfg.Skip.Dirs)
+	if err != nil {
+		log.Fatalf("error searching for existing SPDX IDs: %v", err)
+	}
+
 	log.Printf("selected files: %v", sel)
+	log.Printf("detected SPDX IDs: %v", fis)
 }
