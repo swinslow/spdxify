@@ -14,6 +14,19 @@ identifier, but it differs from the requested new license ID.
 Optionally, also create and file Git commit in a new branch with those
 added license IDs.
 
+Optionally, streamline to:
+1) fork from Github
+2) pull
+3) create branch
+4) make commit
+5) push back to form
+6) create draft PR
+
+Later, investigate similar approach for Gerrit.
+
+Perhaps even use fossdriver to automate submitting to fossology + saving SPDX
+file after completion of scanning.
+
 Depending on file type, use the appropriate comment syntax!
 
 DO NOT add on first line where that would cause functional issues.
@@ -34,13 +47,31 @@ be used for which types of files, e.g.:
         ".py": {
             "comment": "# SPDX"
         },
+        ".sh": {
+            "comment": "# SPDX",
+            "skipFirstIfPrefix": "#!"
+        }
     },
-    "skip": [".jpg", ".png", ...]
+    "skip": {
+        "filetypes": [".jpg", ".png", ...],
+        "dirs": [
+            "**/vendor",
+            ".git",
+        ]
 }
 ```
+
+See
+https://en.wikipedia.org/wiki/List_of_file_formats#Source_code_for_computer_programs
+for list of potentially relevant file types; see also
+https://www.openoffice.org/dev_docs/source/file_extensions.html
 
 Eventually, for binary or non-commentable files with structured metadata
 formats, insert into those as well
 - into appropriate fields for image files with a header field for license or comments
 - into the license field of a package.json file
     - NOTE: this wouldn't be an SPDX-License-Identifier: tag, so maybe don't do this
+
+Also create an entry point runnable via CI systems, to check for IDs in new
+files based on designated filetypes that are checked, and to flag if the
+identifier is missing or different.
