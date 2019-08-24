@@ -3,27 +3,21 @@
 package main
 
 import (
-	"flag"
 	"log"
 
 	"github.com/swinslow/spdxify/pkg/spdxify"
 )
 
 func main() {
-	// set up command line flags
-	cfgPtr := flag.String("c", "", "path to configuration file (defaults to ~/.spdxify.json")
-
-	// parse command line
-	flag.Parse()
-	args := flag.Args()
-	if len(args) != 1 {
-		log.Fatalf("Usage: spdxify [-c] REPOPATH")
+	acfg, args, err := spdxify.ParseArgs()
+	if err != nil {
+		log.Fatalf("error parsing command-line arguments: %v", err)
 	}
 
 	repoPath := args[0]
 
 	// load configuration file
-	cfg, err := spdxify.LoadConfig(*cfgPtr)
+	cfg, err := spdxify.LoadConfig(acfg.CfgPath)
 	if err != nil {
 		log.Fatalf("error loading config file: %v", err)
 	}
@@ -40,6 +34,21 @@ func main() {
 		log.Fatalf("error searching for existing SPDX IDs: %v", err)
 	}
 
+	// set which licenses to apply to which files
+	var fds []spdxify.FileData
+	if acfg.LicenseID != "" {
+		// license was specified on command line
+		fds, err = spdxify.ChooseActions(cfg, sel, fis, acfg)
+		if err != nil {
+			log.Fatalf("error determining actions: %v", err)
+		}
+	} else {
+		// NOT YET IMPLEMENTED
+		log.Fatalf("license to apply was not specified on command line (-l flag); license choice from config file or SPDX file is not yet implemented")
+	}
+
 	log.Printf("selected files: %v", sel)
 	log.Printf("detected SPDX IDs: %v", fis)
+	log.Printf("file data and actions: %#v", fds)
+
 }
